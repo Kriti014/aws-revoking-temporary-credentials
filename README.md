@@ -1,5 +1,8 @@
 # AWS Incident Response: Mitigating Stolen IAM Session Credentials
-
+![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)
+![Security](https://img.shields.io/badge/Domain-Cloud%20Security-red?style=for-the-badge&logo=shield)
+![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Completed-success?style=for-the-badge)
 ## Project Overview
 
 This project demonstrates an end-to-end AWS security breach and incident response remediation workflow. A public-facing EC2 instance operated by **Animals4Life (A4L)** is compromised via a web application vulnerability. The attacker queries the Instance Metadata Service (IMDS) to exfiltrate temporary IAM role credentials and uses them externally from a remote workstation to perform reconnaissance and access AWS resources (S3, EC2).
