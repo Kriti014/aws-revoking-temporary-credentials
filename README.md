@@ -36,8 +36,12 @@ The remediation phase demonstrates how to invalidate stolen temporary credential
 
 Deployed the environment using AWS CloudFormation template `A4LHostingInc.yaml`. This created two public EC2 instances (`A4L-HostingA` and `A4L-HostingB`) equipped with the necessary IAM instance profile.
 
+![Provisioning the A4L stack via CloudFormation.](images/01-cloudformation.png)
+
 
 *Figure 1: Provisioning the A4L stack via CloudFormation.*
+
+![Verification of launched EC2 instances.](images/02-instances.png)
 
 
 *Figure 2: Verification of launched EC2 instances (`A4L-HostingA` and `A4L-HostingB`).*
@@ -48,6 +52,7 @@ Deployed the environment using AWS CloudFormation template `A4LHostingInc.yaml`.
 
 Connected to `A4L-HostingA` using AWS Systems Manager (SSM) Session Manager to simulate gaining shell access via an application vulnerability.
 
+![Provisioning the A4L stack via CloudFormation.](images/03-ssm-connect.png)
 
 *Figure 3: Connecting to the target EC2 instance through SSM Session Manager.*
 
@@ -66,9 +71,11 @@ curl http://169.254.169.254/latest/meta-data/iam/security-credentials/A4L-Instan
 
 ```
 
+![Provisioning the A4L stack via CloudFormation.](images/04-imds-role.png)
 
 *Figure 4: Querying IMDS to discover the role name `A4L-InstanceRole-RIaDr3ApCGWx`.*
 
+![Provisioning the A4L stack via CloudFormation.](images/05-imds-credentials.png)
 
 *Figure 5: Exfiltrating `AccessKeyId`, `SecretAccessKey`, `Token`, and expiration timestamp.*
 
@@ -101,12 +108,15 @@ aws s3 ls
 
 ```
 
+![Provisioning the A4L stack via CloudFormation.](images/06-sts-caller-identity.png)
 
 *Figure 6: External verification showing assumed role identity via `aws sts get-caller-identity`.*
 
+![Provisioning the A4L stack via CloudFormation.](images/07-ec2-describe-instances.png)
 
 *Figure 7: Attacker mapping infrastructure via `aws ec2 describe-instances`.*
 
+![Provisioning the A4L stack via CloudFormation.](images/08-attacker-s3-access.png)
 
 *Figure 8: Successful S3 bucket listing from local Windows command prompt using stolen credentials.*
 
@@ -120,9 +130,11 @@ To stop the breach immediately without impacting underlying role definitions acr
 2. Opened the **Permissions** tab to review attached policies.
 3. Switched to the **Revoke sessions** tab and executed **Revoke active sessions**.
 
+![Provisioning the A4L stack via CloudFormation.](images/09-iam-role-permissions.png)
 
 *Figure 9: Navigating to the compromised IAM Role's Permissions tab in the console.*
 
+![Provisioning the A4L stack via CloudFormation.](images/10-revoke-sessions.png)
 
 *Figure 10: Executing Revoke Active Sessions to attach the `AWSRevokeOlderSessions` inline policy.*
 
@@ -162,6 +174,7 @@ aws s3 ls
 
 Access was blocked immediately with an explicit `AccessDenied` error message.
 
+![Provisioning the A4L stack via CloudFormation.](images/11-access-denied.png)
 
 *Figure 11: Proof of remediation — stolen credentials return an explicit AccessDenied error.*
 
