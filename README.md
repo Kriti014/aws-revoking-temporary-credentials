@@ -8,11 +8,12 @@ The remediation phase demonstrates how to invalidate stolen temporary credential
 
 ---
 
-## Architecture Diagram
+## Architecture & Threat Vector Map
 
-```text
+![AWS Incident Response Architecture Diagram](architecture-diagram.png)
 
-```
+*Figure 0: Concept map highlighting the trust boundary, IMDS exfiltration path, external threat vector, and IAM session revocation control.*
+
 
 ---
 
@@ -21,8 +22,8 @@ The remediation phase demonstrates how to invalidate stolen temporary credential
 * **Infrastructure Context:** A4L operates thousands of web servers using standard HTTP (TCP/80). All instances use IAM instance roles rather than hardcoded credentials to access AWS services.
 * **Attack Scenario:** An attacker gains shell access on EC2 Instance A and abuses IMDS (`169.254.169.254`) to steal the temporary security credentials generated for `A4L-InstanceRole-RIaDr3ApCGWx`.
 * **Incident Response Dilemma:**
-* Deleting the IAM Role breaks all thousands of web servers relying on it.
-* Deleting attached permissions policies leaves web servers functional but unable to access required AWS resources.
+* - Deleting the IAM Role breaks all thousands of web servers relying on it.
+* - Deleting attached permissions policies leaves web servers functional but unable to access required AWS resources.
 
 
 * **Solution:** Revoking active sessions applies an inline deny policy targeting credentials issued **prior** to the breach timestamp using `aws:TokenIssueTime`.
